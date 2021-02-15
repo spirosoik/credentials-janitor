@@ -15,7 +15,19 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// cfg global configuration across the whole
+// services
+var cfg config
+
 func main() {
+	err := LoadConfig(log.New())
+	if err != nil {
+		log.WithError(err).Error("Unable to load config")
+	}
+	if cfg.Debug {
+		handler(context.Background(), events.CloudWatchEvent{})
+		return
+	}
 	lambda.Start(handler)
 }
 
@@ -26,7 +38,7 @@ func handler(ctx context.Context, cloudWatchEvent events.CloudWatchEvent) error 
 	if err != nil {
 		return err
 	}
-	maxTime := time.Now().AddDate(0, 0, 90)
+	maxTime := time.Now().AddDate(0, 0, *cfg.MaxExpirationDays)
 	userToDeleteProfile, keysToDelete, err := checkCredentials(maxTime, users)
 	if err != nil {
 		return err

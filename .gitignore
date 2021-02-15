@@ -16,3 +16,7 @@
 
 # VSCode
 .history
+
+# Bin
+bin/
+*.zip
